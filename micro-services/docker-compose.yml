@@ -1,0 +1,51 @@
+services:
+  backend_service:
+    build: ./services/backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/superdatabase
+    depends_on:
+      - db
+      - kafka
+
+  parser_service:
+    build: ./services/scraping
+    depends_on:
+      - kafka
+
+  bot_service:
+    build: ./services/bot
+    ports:
+      - "5001:5000"
+    depends_on:
+      - backend_service
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: superdatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+
+volumes:
+  postgres_data:

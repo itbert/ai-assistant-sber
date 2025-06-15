@@ -1,0 +1,9 @@
+feedparser
+numpy
+transformers
+torch
+python-telegram-bot
+flair
+sentencepiece
+protobuf
+sqlite3
